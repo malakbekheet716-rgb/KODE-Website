@@ -1,5 +1,14 @@
 const content=document.getElementById('content'), toast=document.getElementById('toast'), drawer=document.getElementById('drawer'), modal=document.getElementById('modal');
 let page='home', dark=false, arabic=false, filter='All Club';
+let feedIndex=0;
+
+const feedItems=[
+  {type:'Club news',icon:'◫',title:'New Club Operating Schedule',dept:'All Club',time:'Posted 10 minutes ago',summary:'Updated operating hours and staff procedures are now available for every KODE employee.',details:'From Sunday, May 17, the club will open at 7:00 AM and close at 11:00 PM. Please review the updated handover, attendance and guest-support procedures before your next shift.',action:'Read announcement'},
+  {type:'Department update',icon:'◌',title:'New Campaign Guidelines',dept:'Marketing Department',time:'Posted 1 hour ago',summary:'Please review the Q3 campaign guidelines and share your feedback with the Marketing team.',details:'The refreshed guidelines include audience segments, brand voice examples, the campaign calendar and the approval process. Your feedback is requested by Thursday at 3:00 PM.',action:'Open department update'},
+  {type:'Event',icon:'◷',title:'KODE Staff Event',dept:'All Club',time:'Wednesday, May 20 · 3:00 PM',summary:'An afternoon for the full club team at the Main Stadium.',details:'Join the staff event at the Main Stadium from 3:00 PM to 6:00 PM. Light refreshments and team activities will be provided. Please confirm your attendance with your manager.',action:'View event'},
+  {type:'Department event',icon:'◷',title:'Digital Marketing Training',dept:'Marketing Department',time:'Wednesday, May 27 · 11:00 AM',summary:'A practical workshop on the new digital campaign toolkit in Training Room 2.',details:'This Marketing-only session covers asset workflows, reporting dashboards and campaign handoff. Bring your laptop and the current campaign brief.',action:'View event'},
+  {type:'Club update',icon:'▣',title:'Employee Handbook v2.1',dept:'All Club',time:'Updated 3 hours ago',summary:'The latest handbook includes updated safety and leave guidance.',details:'Version 2.1 clarifies the annual leave request process, emergency response roles and staff benefits. Please acknowledge the revised handbook by the end of the month.',action:'Open handbook'}
+];
 
 const notifications=[
  ['purple','◈','New announcement','Company-wide meeting on May 20 at 10:00 AM.','10m ago'],
@@ -8,33 +17,24 @@ const notifications=[
  ['yellow','▣','Document updated','Employee Handbook was updated to v2.1.','3h ago']
 ];
 
-function toastMsg(t){toast.textContent=t;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200)}
+function toastMsg(t,duration=2200){toast.textContent=t;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),duration)}
 function go(p){page=p;document.querySelectorAll('.nav[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));render()}
 function stat(icon,n,label,cls){return `<div class="stat ${cls}"><div class="s-icon">${icon}</div><strong>${n}</strong><label>${label}</label><a href="#" onclick="event.preventDefault();toastMsg('Opening ${label}')">View ${label.toLowerCase()} →</a></div>`}
 function head(k,sub){return `<div class="page-title">${k}</div><div class="sub">${sub}</div>`}
 function newsCard(title,dept,desc,tag='New'){return `<div class="news-item"><div class="news-img"></div><div class="news-copy"><span class="pill ${dept==='Marketing'?'primary':''}">${dept}</span><h3>${title}</h3><p>${desc}</p><div class="meta">Marketing Department · 1h ago ${tag?`· <span class="pill new">${tag}</span>`:''}</div></div></div>`}
 function eventRow(date,title,time,place,type){let [m,d]=date.split(' ');return `<div class="event"><div class="datebox"><small>${m}</small><b>${d}</b></div><div class="event-main"><b>${title}</b><span>◷ ${time} · ⌖ ${place}</span></div><span class="pill ${type==='Department'?'primary':''}">${type}</span></div>`}
 function notificationHtml(){return notifications.map(n=>`<div class="notif"><div class="nicon ${n[0]}">${n[1]}</div><div><b>${n[2]}</b><p>${n[3]}</p><time>${n[4]}</time></div></div>`).join('')}
+function feedDeck(){
+ const item=feedItems[feedIndex], dots=feedItems.map((_,i)=>`<span class="feed-dot ${i===feedIndex?'active':''}"></span>`).join('');
+ return `<section class="feed-section"><div class="section-head feed-heading"><div><span class="eyebrow">YOUR DAILY FEED</span><h2>Today at KODE</h2></div><span class="feed-count">${feedIndex+1} of ${feedItems.length}</span></div>
+ <div class="feed-stage" id="feedStage" aria-label="Swipeable updates feed"><article class="feed-card" id="feedCard" tabindex="0"><div class="feed-top"><span class="feed-kind"><b>${item.icon}</b>${item.type}</span><span class="pill ${item.dept.includes('Marketing')?'primary':''}">${item.dept}</span></div><div class="feed-art"><span>${item.icon}</span><i>KODE</i></div><div class="feed-body"><time>${item.time}</time><h3>${item.title}</h3><p>${item.summary}</p></div><div class="feed-hint feed-hint-next">Next <b>←</b></div><div class="feed-hint feed-hint-open"><b>→</b> Details</div></article></div>
+ <div class="feed-dots" aria-label="${feedItems.length} feed items">${dots}</div><p class="feed-instructions">Swipe left for the next update · Swipe right to open details</p></section>`;
+}
+function advanceFeed(){feedIndex=(feedIndex+1)%feedItems.length;render()}
+function openFeedDetails(){const item=feedItems[feedIndex],action=item.dept.includes('Marketing')?"go('department')":`toastMsg('Opening ${item.action}')`;modal.classList.add('show');document.getElementById('modalBody').innerHTML=`<span class="pill ${item.dept.includes('Marketing')?'primary':''}">${item.dept}</span><h2 class="feed-modal-title">${item.title}</h2><p class="feed-modal-meta">${item.type} · ${item.time}</p><p class="feed-modal-copy">${item.details}</p><button class="btn" onclick="document.getElementById('closeModal').click();${action}">${item.action}</button>`}
+function bindFeedSwipe(){const card=document.getElementById('feedCard');if(!card)return;let startX=0,deltaX=0,dragging=false;const reset=()=>{card.style.transform='';card.classList.remove('dragging')};const move=e=>{if(!dragging)return;deltaX=e.clientX-startX;card.style.transform=`translateX(${deltaX}px) rotate(${deltaX/28}deg)`};const finish=()=>{if(!dragging)return;dragging=false;window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',finish);window.removeEventListener('pointercancel',cancel);if(deltaX<=-55){card.classList.add('leaving-left');setTimeout(advanceFeed,180)}else if(deltaX>=55){card.classList.add('leaving-right');setTimeout(openFeedDetails,180);setTimeout(reset,190)}else reset()};const cancel=()=>{dragging=false;window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',finish);window.removeEventListener('pointercancel',cancel);reset()};card.addEventListener('pointerdown',e=>{startX=e.clientX;deltaX=0;dragging=true;card.classList.add('dragging');window.addEventListener('pointermove',move);window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',cancel)});card.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')advanceFeed();if(e.key==='ArrowRight')openFeedDetails()})}
 function home(){
-return `<div class="welcome"><div><h1>Good morning, Malak! 👋</h1><p>Marketing Department</p></div><div class="quote">“Teamwork makes the dream work.”<br><span>— KODE Culture</span></div></div>
-<div class="stat-grid">${stat('▤','2','Action Required','red')}${stat('♢','3','New Updates','blue')}${stat('▣','2','Upcoming Events','green')}${stat('◌','1','Question Answered','purple')}</div>
-<div class="two-col section">
-<div><div class="section-head"><h2>Latest from My Department</h2><button class="view" onclick="go('department')">View all →</button></div><div class="card news-list">
-${newsCard('New Campaign Guidelines','Marketing','Please review the new campaign guidelines for Q3 and share your feedback.')}
-${newsCard('Marketing Team Meeting','Marketing','Join us this Thursday to discuss the upcoming campaign and strategies.')}
-${newsCard('Updated Brand Resources','Marketing','New logos, templates and brand assets are now available.','')}</div>
-<div class="section-head"><h2>Action Required</h2><button class="view">View all →</button></div><div class="card task-list">
-<div class="task"><span class="check"></span><div class="task-main"><b>Complete safety training</b><span>Due: May 20, 2026</span></div><span class="priority high">High</span></div>
-<div class="task"><span class="check"></span><div class="task-main"><b>Review updated policy</b><span>Due: May 18, 2026</span></div><span class="priority med">Medium</span></div></div></div>
-<div><div class="section-head"><h2>Upcoming Events</h2><button class="view" onclick="go('events')">View calendar →</button></div><div class="card event-list">${eventRow('MAY 16','Marketing Team Meeting','10:00 AM - 11:30 AM','Marketing Room','Department')}${eventRow('MAY 20','KODE Staff Event','03:00 PM - 06:00 PM','Main Stadium','Club')}${eventRow('MAY 27','Digital Marketing Training','11:00 AM - 01:00 PM','Training Room 2','Department')}</div>
-<div class="section-head"><h2>Recently Updated Documents</h2><button class="view" onclick="go('resources')">View all →</button></div><div class="card doc-list">
-${doc('PDF','Employee Handbook v2.1','Updated 2h ago')}${doc('DOC','Marketing Guidelines v3.0','Updated 1d ago')}${doc('PDF','Safety Procedures v2.4','Updated 2d ago')}</div></div>
-</div>
-<div class="bottom-grid section">
-<div><div class="section-head"><h2>Frequently Used</h2></div><div class="card quick-list">${quick('Leave Request Form','▣')}${quick('Expense Claim Form','▤')}${quick('IT Support Request','♧')}${quick('Training Material','▥')}</div></div>
-<div><div class="section-head"><h2>My Department Discussions</h2><button class="view" onclick="go('department')">View all →</button></div><div class="card qa"><div class="qa-row"><span class="pill primary status">Answered</span><h4>Where can I find the new campaign template?</h4><p>Answered by Ahmed Samy · 1h ago</p></div><div class="qa-row"><span class="pill status">2 replies</span><h4>When is the next team briefing?</h4><p>Marketing Department · Today</p></div></div></div>
-<div><div class="section-head"><h2>KODE Recognition</h2><button class="view" onclick="go('recognition')">View all →</button></div><div class="card recognition"><div class="recognition-card"><div class="trophy">🏆</div><div><b>Great Teamwork!</b><p>Congratulations to Sarah for her outstanding support in our latest event.</p></div><div class="avatar">SA</div></div></div></div>
-</div>`;
+return `${feedDeck()}`;
 }
 function doc(i,t,s){return `<div class="doc"><div class="doc-icon">${i}</div><div class="doc-main"><b>${t}</b><span>${s}</span></div><span>›</span></div>`}
 function quick(t,i){return `<button class="quick" onclick="toastMsg('Opening ${t}')"><div class="qicon">${i}</div><b>${t}</b><span>Open →</span></button>`}
@@ -60,6 +60,7 @@ function recognitionPage(){return `${head('KODE Recognition','Celebrate colleagu
 function render(){
   const pages={home,news:newsPage,events:eventsPage,department:departmentPage,resources:resourcesPage,contacts:contactsPage,faqs:faqsPage,feedback:feedbackPage,recognition:recognitionPage};
   content.innerHTML=pages[page]();
+  if(page==='home')bindFeedSwipe();
 }
 function contactFilter(){let q=document.getElementById('contactSearch').value.toLowerCase();document.querySelectorAll('.contact').forEach(x=>x.style.display=x.dataset.key.includes(q)?'block':'none')}
 function ask(){let q=document.getElementById('q').value.trim();if(!q)return toastMsg('Please write your question first');toastMsg('Question submitted to Marketing')}
@@ -69,7 +70,8 @@ function openNotifications(){document.getElementById('notificationList').innerHT
 document.querySelectorAll('.nav[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
 document.getElementById('notifications').onclick=openNotifications;
 document.getElementById('closeDrawer').onclick=()=>drawer.classList.remove('show');
-document.getElementById('theme').onclick=()=>{dark=!dark;document.body.classList.toggle('dark',dark);toastMsg(dark?'Dark mode enabled':'Light mode enabled')};
+function toggleAppearance(){dark=!dark;document.body.classList.toggle('dark',dark);localStorage.setItem('kode-mode',dark?'dark':'light');toastMsg(dark?'Dark mode enabled':'Light mode enabled',800)}
+document.getElementById('theme').onclick=toggleAppearance;
 document.getElementById('language').onclick=()=>{arabic=!arabic;document.documentElement.dir=arabic?'rtl':'ltr';document.body.classList.toggle('rtl',arabic);document.getElementById('language').innerHTML=arabic?'◉ AR ⌄':'◉ EN ⌄';toastMsg(arabic?'تم تفعيل العربية':'English enabled')};
 document.getElementById('settings').onclick=()=>{modal.classList.add('show');document.getElementById('modalBody').innerHTML=`<h2 style="font-size:18px">Settings</h2><p style="color:var(--muted);font-size:11px">Personalize your KODE experience.</p><div class="form"><button class="btn light" onclick="document.getElementById('language').click();document.getElementById('closeModal').click()">Language · English / العربية</button><button class="btn light" onclick="document.getElementById('theme').click();document.getElementById('closeModal').click()">Appearance · Light / Dark</button><button class="btn light" onclick="toastMsg('Notification preferences opened');document.getElementById('closeModal').click()">Notification preferences</button></div>`};
 document.getElementById('closeModal').onclick=()=>modal.classList.remove('show');
@@ -88,18 +90,18 @@ const themeNames={
   sunset:'Sunset', rose:'Rose', indigo:'Indigo'
 };
 function setTheme(name){
-  if(name==='default') document.body.removeAttribute('data-theme');
-  else document.body.setAttribute('data-theme',name);
+  document.body.dataset.theme=name==='default'?'':name;
   localStorage.setItem('kode-theme',name);
   document.querySelectorAll('.theme-choice').forEach(x=>x.classList.toggle('active',x.dataset.theme===name));
-  toastMsg(themeNames[name]+' theme enabled');
+  toastMsg(themeNames[name]+' theme enabled',800);
 }
 function openThemes(){
   modal.classList.add('show');
   const current=document.body.getAttribute('data-theme')||'default';
   document.getElementById('modalBody').innerHTML=`
     <h2 style="font-size:18px;margin:0">Appearance & Themes</h2>
-    <p style="color:var(--muted);font-size:11px">Blue and purple is the KODE default. Choose another accent without changing the club content.</p>
+    <p style="color:var(--muted);font-size:11px">Choose a palette, then choose its light or dark version.</p>
+    <div class="theme-mode"><button class="theme-mode-choice ${!dark?'active':''}" onclick="if(dark)toggleAppearance()">☼ Light</button><button class="theme-mode-choice ${dark?'active':''}" onclick="if(!dark)toggleAppearance()">☾ Dark</button></div>
     <div class="theme-picker">
       <button class="theme-choice ${current==='default'?'active':''}" data-theme="default" onclick="setTheme('default')"><span class="theme-dot dot-default"></span>KODE Blue / Purple</button>
       <button class="theme-choice ${current==='ocean'?'active':''}" data-theme="ocean" onclick="setTheme('ocean')"><span class="theme-dot dot-ocean"></span>Ocean</button>
@@ -113,6 +115,8 @@ function openThemes(){
 document.getElementById('themes').onclick=openThemes;
 const savedTheme=localStorage.getItem('kode-theme')||'default';
 if(savedTheme!=='default')document.body.setAttribute('data-theme',savedTheme);
+dark=localStorage.getItem('kode-mode')==='dark';
+document.body.classList.toggle('dark',dark);
 
 /* =========================================================
    KODE BUDDY
@@ -151,7 +155,7 @@ function openPetPicker(){
         </button>`).join('')}
     </div>
     <div style="margin-top:14px;display:flex;gap:7px;align-items:center">
-      <button class="btn light" onclick="togglePetVisibility()">Show / hide buddy</button>
+      <button class="btn light" onclick="togglePetVisibilityExplicit()">Show / hide buddy</button>
       <button class="btn" onclick="document.getElementById('closeModal').click()">Done</button>
     </div>`;
 }
@@ -160,8 +164,8 @@ function choosePet(k){
   localStorage.setItem('kode-pet',k);
   applyPet();
   document.querySelectorAll('.pet-option').forEach(x=>x.classList.toggle('active',x.dataset.pet===k));
-  const el=document.getElementById('petCharacter');
-  el.classList.remove('pet-bounce'); void el.offsetWidth; el.classList.add('pet-bounce');
+  const el=document.querySelector('.pet-character');
+  if(el){el.classList.remove('pet-bounce'); void el.offsetWidth; el.classList.add('pet-bounce')}
   toastMsg(petData[k].name+' selected');
 }
 function togglePet(){
