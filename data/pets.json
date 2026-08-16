@@ -1,0 +1,10 @@
+{
+  "fox": {"name": "KODE Fox", "file": "fox.svg"},
+  "cat": {"name": "KODE Cat", "file": "cat.svg"},
+  "dog": {"name": "KODE Dog", "file": "dog.svg"},
+  "bull": {"name": "KODE Bull", "file": "bull.svg"},
+  "panda": {"name": "KODE Panda", "file": "panda.svg"},
+  "bunny": {"name": "KODE Bunny", "file": "bunny.svg"},
+  "penguin": {"name": "KODE Penguin", "file": "penguin.svg"},
+  "bear": {"name": "KODE Bear", "file": "bear.svg"}
+}

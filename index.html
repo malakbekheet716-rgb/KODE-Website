@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KODE Sports Club — Employee Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo"><span>K</span></div><div><b>KODE</b><small>SPORTS CLUB</small></div></div>
+    <div class="profile-card">
+      <div class="avatar">MH</div><div class="profile-copy"><b>Malak Hussein</b><span>Marketing Specialist</span><small>Marketing Department</small></div><button class="more">•••</button>
+    </div>
+    <nav>
+      <div class="nav-label">MAIN</div>
+      <button class="nav active" data-page="home"><i>⌂</i><span>My KODE</span></button>
+      <button class="nav" data-page="news"><i>◫</i><span>News</span></button>
+      <button class="nav" data-page="events"><i>◷</i><span>Events</span></button>
+      <button class="nav" data-page="department"><i>◈</i><span>My Department</span><em class="nav-badge">3</em></button>
+      <button class="nav" data-page="resources"><i>▣</i><span>Resources</span></button>
+      <button class="nav" data-page="contacts"><i>♧</i><span>Contacts</span></button>
+      <button class="nav" data-page="faqs"><i>?</i><span>FAQs</span></button>
+      <div class="nav-label other">OTHER</div>
+      <button class="nav" data-page="feedback"><i>✦</i><span>Feedback</span></button>
+      <button class="nav" data-page="recognition"><i>★</i><span>KODE Recognition</span></button>
+    </nav>
+    <div class="side-footer">
+      <button class="nav" id="settings"><i>⚙</i><span>Settings</span></button>
+      <button class="nav" id="logout"><i>↪</i><span>Log out</span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="mobile-menu" id="mobileMenu">☰</button>
+      <div class="search"><span>⌕</span><input id="search" placeholder="What are you looking for?"><kbd>Ctrl K</kbd></div>
+      <div class="top-right">
+        <button class="top-btn" id="language">◉ <span>EN</span>⌄</button>
+        <button class="top-btn" id="theme" title="Light / Dark">☼</button><button class="top-btn" id="themes" title="Themes">◈</button>
+        <button class="top-btn bell" id="notifications">♧<b>3</b></button>
+        <div class="top-user"><div class="avatar sm">MH</div><span>Malak Hussein</span><b>⌄</b></div>
+      </div>
+    </header>
+    <div id="content"></div>
+  </main>
+</div>
+
+<div class="drawer" id="drawer"><div class="drawer-panel"><div class="drawer-head"><b>Notifications</b><button id="closeDrawer">×</button></div><div id="notificationList"></div></div></div>
+<div class="modal" id="modal"><div class="modal-box"><button class="close-modal" id="closeModal">×</button><div id="modalBody"></div></div></div>
+
+<div class="pet-companion moving" id="petCompanion" aria-label="KODE animated companion">
+  <div class="pet-character"><img id="petImage" src="assets/mascots/fox.svg" alt="KODE Buddy"><span class="pet-name" id="petName">KODE Fox</span></div>
+  <span class="spark s1">✦</span><span class="spark s2">·</span><span class="spark s3">✧</span>
+</div>
+<div class="pet-controls" id="petControls">
+  <button id="petToggle" class="pet-main-toggle" title="Show or hide KODE Buddy">🐶 <span id="petToggleLabel">Buddy</span></button>
+  <button id="petPlay" title="Pause / play companion">Ⅱ</button>
+  <button id="petCustomize" title="Choose your companion">☺</button>
+</div>
+<div class="pet-show-pill pet-hidden" id="petShowPill">
+  <button id="petShowButton">🐶 Show Buddy</button>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
